@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asystent Transportu v4</title>
+    <title>Asystent Transportu v5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,6 +28,7 @@
             <p class="text-gray-600 dark:text-gray-400 mt-2">Twoje cyfrowe raporty dzienne.</p>
         </header>
 
+        <!-- Widok listy raportów -->
         <div id="reportsListContainer">
             <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
                 <div class="flex justify-between items-center mb-4">
@@ -40,6 +41,7 @@
             </div>
         </div>
 
+        <!-- Widok edytora raportu -->
         <div id="reportEditorContainer" class="hidden">
             <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
                 <div class="flex flex-wrap gap-2 justify-between items-center mb-6 border-b dark:border-gray-700 pb-4 no-print">
@@ -112,12 +114,14 @@
             </div>
         </div>
 
+        <!-- Modal do zarządzania stanem magazynowym -->
         <div id="inventoryModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
                 <h2 class="text-2xl font-bold mb-4">Zarządzaj stanem magazynowym</h2>
                 
                 <div id="modalInventoryList" class="space-y-2 max-h-48 overflow-y-auto mb-4 border-b dark:border-gray-700 pb-4">
-                    </div>
+                    <!-- Lista przedmiotów w modalu -->
+                </div>
 
                 <h3 class="text-lg font-semibold mb-2">Dodaj nowy przedmiot</h3>
                 <div class="flex items-center gap-2 mb-4">
@@ -305,6 +309,7 @@
             this.renderReportEditor();
         },
 
+        // --- POPRAWIONA FUNKCJA ---
         createStageElement(stage, index) {
             const el = document.createElement('div');
             el.className = 'stage-item bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border dark:border-gray-700';
@@ -320,11 +325,15 @@
                 <input type="text" name="distance" value="${stage.distance}" placeholder="Dystans (np. 90+20)" class="mt-3 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" oninput="app.calculateAndRenderSummaries()">
                 <div class="mt-4">
                     <h4 class="font-semibold mb-2">Zadania w tej lokalizacji:</h4>
-                    <div class="tasks-container space-y-2">
-                        ${stage.tasks.map((task, taskIndex) => this.createTaskElement(task, index, taskIndex)).join('')}
-                    </div>
+                    <div class="tasks-container space-y-2"></div>
                     <button onclick="app.addTask(${index})" class="mt-2 text-sm bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-800 dark:text-blue-200 font-semibold py-1 px-3 rounded-md w-full no-print">+ Dodaj zadanie</button>
                 </div>`;
+            
+            const tasksContainer = el.querySelector('.tasks-container');
+            stage.tasks.forEach((task, taskIndex) => {
+                tasksContainer.appendChild(this.createTaskElement(task, index, taskIndex));
+            });
+            
             return el;
         },
         createTaskElement(task, stageIndex, taskIndex) {
@@ -333,22 +342,23 @@
             el.className = 'task-item flex gap-2 items-center';
             el.innerHTML = `
                 <select name="taskType" class="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" onchange="app.updateInventoryOnTheFly()">${Object.entries(taskTypes).map(([k, v]) => `<option value="${k}" ${task.type === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
-                <input type="text" name="taskDescription" value="${task.description}" placeholder="Opis zadania" class="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 min-w-0" oninput="app.updateInventoryOnTheFly()">
-                <button onclick="app.removeElement('task', ${stageIndex}, ${taskIndex})" class="p-2 text-red-500 hover:text-red-700 flex-shrink-0 no-print">
+                <input type="text" name="taskDescription" value="${task.description}" placeholder="Opis zadania" class="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 min-w-0">
+                <button class="p-2 text-red-500 hover:text-red-700 flex-shrink-0 no-print">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>`;
+            el.querySelector('button').onclick = () => this.removeElement('task', stageIndex, taskIndex);
             return el;
         },
-        // --- POPRAWIONE FUNKCJE ---
         createExpenseElement(expense, index) {
             const el = document.createElement('div');
             el.className = "expense-item flex gap-2 items-center";
             el.innerHTML = `
                 <input type="text" name="expenseCategory" value="${expense.category}" placeholder="Kategoria (np. Paliwo)" class="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 min-w-0">
                 <input type="number" step="0.01" name="expenseAmount" value="${expense.amount}" placeholder="Kwota" class="w-28 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" oninput="app.calculateAndRenderSummaries()">
-                <button onclick="app.removeElement('expense', ${index})" class="p-2 text-red-500 hover:text-red-700 flex-shrink-0 no-print">
+                <button class="p-2 text-red-500 hover:text-red-700 flex-shrink-0 no-print">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>`;
+            el.querySelector('button').onclick = () => this.removeElement('expense', index);
             return el;
         },
         createIncomeElement(income, index) {
@@ -357,12 +367,12 @@
             el.innerHTML = `
                 <input type="text" name="incomeSource" value="${income.source}" placeholder="Źródło (np. Złom)" class="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 min-w-0">
                 <input type="number" step="0.01" name="incomeAmount" value="${income.amount}" placeholder="Kwota" class="w-28 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" oninput="app.calculateAndRenderSummaries()">
-                <button onclick="app.removeElement('income', ${index})" class="p-2 text-red-500 hover:text-red-700 flex-shrink-0 no-print">
+                <button class="p-2 text-red-500 hover:text-red-700 flex-shrink-0 no-print">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>`;
+            el.querySelector('button').onclick = () => this.removeElement('income', index);
             return el;
         },
-        // --- KONIEC POPRAWIONYCH FUNKCJI ---
         
         calculateAndRenderSummaries() {
             let dist = 0; document.querySelectorAll('input[name=distance]').forEach(i => { dist += (i.value.split('+').map(p => parseFloat(p.trim())||0)).reduce((a, b) => a + b, 0); });
@@ -427,8 +437,9 @@
                     itemEl.className = 'flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-2 rounded';
                     itemEl.innerHTML = `
                         <span class="capitalize">${item} (x${count})</span>
-                        <button onclick="app.deleteInventoryItem('${item}')" class="text-red-500 hover:text-red-700 font-bold py-1 px-2">Usuń</button>
+                        <button class="text-red-500 hover:text-red-700 font-bold py-1 px-2">Usuń</button>
                     `;
+                    itemEl.querySelector('button').onclick = () => this.deleteInventoryItem(item);
                     listEl.appendChild(itemEl);
                 });
             }
@@ -453,7 +464,7 @@
         },
         saveInventoryChanges() {
             this.saveData();
-            if (!this.currentReportId) {
+            if (this.currentReport && !this.currentReportId) {
                 this.currentReport.initialInventory = JSON.parse(JSON.stringify(this.globalInventory));
                 this.renderInventory();
             }
