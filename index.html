@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asystent Transportu</title>
+    <title>Asystent Transportu v2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,113 +11,95 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        .scroll-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        .no-print {
+            display: block;
         }
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #pdf-content, #pdf-content * {
-                visibility: visible;
-            }
-            #pdf-content {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-            .no-print {
-                display: none !important;
-            }
+            body * { visibility: hidden; }
+            #pdf-content, #pdf-content * { visibility: visible; }
+            #pdf-content { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+        }
+        /* Style dla modala */
+        .modal-overlay {
+            transition: opacity 0.3s ease;
         }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-    <div id="app" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div id="app" class="max-w-4xl mx-auto p-2 sm:p-6 lg:p-8">
         
-        <!-- Nagłówek Aplikacji -->
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-blue-600 dark:text-blue-400">Asystent Transportu</h1>
             <p class="text-gray-600 dark:text-gray-400 mt-2">Twoje cyfrowe raporty dzienne.</p>
         </header>
 
-        <!-- Kontener dla widoku listy raportów -->
+        <!-- Widok listy raportów -->
         <div id="reportsListContainer">
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-semibold">Zapisane Raporty</h2>
-                    <button onclick="app.showEditor()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                    <button onclick="app.showEditor()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 no-print">
                         + Dodaj nowy raport
                     </button>
                 </div>
-                <div id="reportsList" class="space-y-3">
-                    <!-- Lista raportów zostanie wstawiona tutaj przez JS -->
-                </div>
+                <div id="reportsList" class="space-y-3"></div>
             </div>
         </div>
 
-        <!-- Kontener dla edytora raportu -->
+        <!-- Widok edytora raportu -->
         <div id="reportEditorContainer" class="hidden">
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                <!-- Główne przyciski akcji -->
-                <div class="flex flex-wrap gap-4 justify-between items-center mb-6 border-b dark:border-gray-700 pb-4">
+            <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
+                <div class="flex flex-wrap gap-2 justify-between items-center mb-6 border-b dark:border-gray-700 pb-4 no-print">
                     <button onclick="app.showList()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition">
-                        &larr; Wróć do listy
+                        &larr; Wróć
                     </button>
-                    <div class="flex gap-4">
+                    <div class="flex gap-2 sm:gap-4">
                         <button onclick="app.generatePdf()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">
-                            Pobierz PDF
+                            PDF
                         </button>
                         <button onclick="app.saveReport()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
-                            Zapisz i zamknij
+                            Zapisz
                         </button>
                     </div>
                 </div>
 
-                <!-- Formularz edycji raportu -->
                 <div id="reportForm">
                     <div class="mb-6">
                         <label for="reportDate" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Data wyjazdu</label>
                         <input type="date" id="reportDate" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
-                    <!-- Sekcja Trasy i Zadań -->
                     <div class="mb-6">
                         <h3 class="text-xl font-semibold mb-3 border-l-4 border-blue-500 pl-3">Trasa i Zadania</h3>
-                        <div id="stagesContainer" class="space-y-4">
-                            <!-- Etapy będą wstawiane tutaj przez JS -->
-                        </div>
-                        <button onclick="app.addStage()" class="mt-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg w-full transition">
+                        <div id="stagesContainer" class="space-y-4"></div>
+                        <button onclick="app.addStage()" class="mt-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg w-full transition no-print">
                             + Dodaj kolejny etap trasy
                         </button>
                     </div>
 
-                    <!-- Sekcja Finansów -->
                     <div class="grid md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <h3 class="text-xl font-semibold mb-3 border-l-4 border-red-500 pl-3">Wydatki</h3>
                             <div id="expensesContainer" class="space-y-2 mb-3"></div>
-                            <button onclick="app.addExpense()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg w-full transition">+ Dodaj wydatek</button>
+                            <button onclick="app.addExpense()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg w-full transition no-print">+ Dodaj wydatek</button>
                         </div>
                         <div>
                             <h3 class="text-xl font-semibold mb-3 border-l-4 border-green-500 pl-3">Przychody</h3>
                             <div id="incomesContainer" class="space-y-2 mb-3"></div>
-                            <button onclick="app.addIncome()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg w-full transition">+ Dodaj przychód</button>
+                            <button onclick="app.addIncome()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg w-full transition no-print">+ Dodaj przychód</button>
                         </div>
                     </div>
                     
-                    <!-- Sekcja Stan Magazynowy -->
                     <div class="mb-6">
-                        <h3 class="text-xl font-semibold mb-3 border-l-4 border-yellow-500 pl-3">Stan Magazynowy (na pojeździe)</h3>
-                        <div id="inventoryContainer" class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg min-h-[100px]">
-                            <!-- Stan magazynowy będzie tutaj -->
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-xl font-semibold border-l-4 border-yellow-500 pl-3">Stan Magazynowy</h3>
+                            <button onclick="app.openInventoryModal()" class="text-sm bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded-lg transition no-print">Zarządzaj stanem</button>
                         </div>
+                        <div id="inventoryContainer" class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg min-h-[100px]"></div>
                     </div>
 
-
-                    <!-- Sekcja Podsumowania -->
                     <div class="mt-8 pt-6 border-t dark:border-gray-700">
                         <h3 class="text-2xl font-bold mb-4 text-center">Podsumowanie Dnia</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
@@ -139,45 +121,48 @@
             </div>
         </div>
 
-        <!-- Stopka -->
+        <!-- Modal do zarządzania stanem magazynowym -->
+        <div id="inventoryModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+                <h2 class="text-2xl font-bold mb-4">Zarządzaj stanem magazynowym</h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Tutaj możesz ręcznie usunąć przedmioty ze stanu, który zostanie przeniesiony na kolejny dzień.</p>
+                <div id="modalInventoryList" class="space-y-2 max-h-64 overflow-y-auto mb-4">
+                    <!-- Lista przedmiotów w modalu -->
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button onclick="app.closeInventoryModal()" class="bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg">Anuluj</button>
+                    <button onclick="app.saveInventoryChanges()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Zapisz zmiany</button>
+                </div>
+            </div>
+        </div>
+
         <footer class="text-center mt-12 text-gray-500 dark:text-gray-400 text-sm">
             <p>&copy; 2025 Asystent Transportu. Stworzone, by ułatwić Ci pracę.</p>
         </footer>
     </div>
     
-    <!-- Szablon do generowania PDF -->
-    <div id="pdf-template" class="hidden">
-        <div id="pdf-content" class="p-8">
-            <!-- Tutaj będzie wstrzykiwana treść raportu do PDF -->
-        </div>
-    </div>
-
+    <div id="pdf-template" class="hidden"><div id="pdf-content" class="p-8"></div></div>
 
     <script>
     const app = {
-        // Przechowuje wszystkie raporty
         reports: [],
-        // Przechowuje aktualnie edytowany raport
         currentReport: null,
-        // Przechowuje ID aktualnie edytowanego raportu
         currentReportId: null,
+        // Globalny stan magazynowy przenoszony między dniami
+        globalInventory: {},
 
-        // Inicjalizacja aplikacji
         init() {
-            this.loadReports();
+            this.loadData();
             this.showList();
-            // Ustawienie domyślnej daty na dzisiaj dla nowych raportów
             document.getElementById('reportDate').valueAsDate = new Date();
         },
 
-        // Przełącza widok na listę raportów
+        // Przełącza widoki
         showList() {
             document.getElementById('reportsListContainer').classList.remove('hidden');
             document.getElementById('reportEditorContainer').classList.add('hidden');
             this.renderReportsList();
         },
-
-        // Przełącza widok na edytor (nowy lub istniejący raport)
         showEditor(reportId = null) {
             document.getElementById('reportsListContainer').classList.add('hidden');
             document.getElementById('reportEditorContainer').classList.remove('hidden');
@@ -192,7 +177,7 @@
             this.renderReportEditor();
         },
         
-        // Zwraca szablon nowego raportu
+        // Szablon nowego raportu, uwzględniający globalny stan magazynowy
         getNewReportTemplate() {
             return {
                 id: `report-${Date.now()}`,
@@ -200,58 +185,55 @@
                 stages: [],
                 expenses: [],
                 incomes: [],
-                inventory: []
+                // Kopiuje globalny stan jako stan początkowy dla tego raportu
+                initialInventory: JSON.parse(JSON.stringify(this.globalInventory))
             };
         },
 
-        // Ładuje raporty z localStorage
-        loadReports() {
+        // Ładowanie i zapisywanie danych
+        loadData() {
             const savedReports = localStorage.getItem('transportReports');
-            if (savedReports) {
-                this.reports = JSON.parse(savedReports);
-            }
+            if (savedReports) this.reports = JSON.parse(savedReports);
+            
+            const savedInventory = localStorage.getItem('transportGlobalInventory');
+            if (savedInventory) this.globalInventory = JSON.parse(savedInventory);
         },
-
-        // Zapisuje wszystkie raporty do localStorage
-        saveReportsToStorage() {
+        saveData() {
             localStorage.setItem('transportReports', JSON.stringify(this.reports));
+            localStorage.setItem('transportGlobalInventory', JSON.stringify(this.globalInventory));
         },
 
-        // Zapisuje aktualnie edytowany raport
+        // Zapisywanie raportu i aktualizacja globalnego stanu
         saveReport() {
             this.updateCurrentReportFromDOM();
+            
+            // Oblicz finalny stan magazynowy dla tego dnia i ustaw go jako globalny
+            this.globalInventory = this.calculateInventoryForReport(this.currentReport);
+
             if (this.currentReportId) {
-                // Aktualizacja istniejącego raportu
                 const index = this.reports.findIndex(r => r.id === this.currentReportId);
-                if (index !== -1) {
-                    this.reports[index] = this.currentReport;
-                }
+                if (index !== -1) this.reports[index] = this.currentReport;
             } else {
-                // Dodanie nowego raportu
                 this.reports.push(this.currentReport);
             }
-            // Sortowanie raportów po dacie, od najnowszych
             this.reports.sort((a, b) => new Date(b.date) - new Date(a.date));
-            this.saveReportsToStorage();
+            this.saveData();
             this.showList();
         },
 
-        // Usuwa raport
         deleteReport(reportId) {
             if (confirm('Czy na pewno chcesz usunąć ten raport? Tej operacji nie można cofnąć.')) {
                 this.reports = this.reports.filter(r => r.id !== reportId);
-                this.saveReportsToStorage();
+                this.saveData();
                 this.renderReportsList();
             }
         },
         
-        // Aktualizuje obiekt currentReport na podstawie danych z formularza
         updateCurrentReportFromDOM() {
+            if (!this.currentReport) return;
             this.currentReport.date = document.getElementById('reportDate').value;
-
-            // Aktualizacja etapów
             this.currentReport.stages = [];
-            document.querySelectorAll('.stage-item').forEach((stageEl, index) => {
+            document.querySelectorAll('.stage-item').forEach((stageEl) => {
                 const stage = {
                     from: stageEl.querySelector(`[name=from]`).value,
                     to: stageEl.querySelector(`[name=to]`).value,
@@ -266,27 +248,11 @@
                 });
                 this.currentReport.stages.push(stage);
             });
-
-            // Aktualizacja wydatków i przychodów
-            this.currentReport.expenses = [];
-            document.querySelectorAll('.expense-item').forEach(el => {
-                this.currentReport.expenses.push({
-                    category: el.querySelector(`[name=expenseCategory]`).value,
-                    amount: el.querySelector(`[name=expenseAmount]`).value
-                });
-            });
-            
-            this.currentReport.incomes = [];
-            document.querySelectorAll('.income-item').forEach(el => {
-                this.currentReport.incomes.push({
-                    source: el.querySelector(`[name=incomeSource]`).value,
-                    amount: el.querySelector(`[name=incomeAmount]`).value
-                });
-            });
+            this.currentReport.expenses = Array.from(document.querySelectorAll('.expense-item')).map(el => ({ category: el.querySelector(`[name=expenseCategory]`).value, amount: el.querySelector(`[name=expenseAmount]`).value }));
+            this.currentReport.incomes = Array.from(document.querySelectorAll('.income-item')).map(el => ({ source: el.querySelector(`[name=incomeSource]`).value, amount: el.querySelector(`[name=incomeAmount]`).value }));
         },
 
-
-        // Renderuje listę zapisanych raportów
+        // Renderowanie listy raportów
         renderReportsList() {
             const listEl = document.getElementById('reportsList');
             listEl.innerHTML = '';
@@ -311,83 +277,59 @@
             });
         },
 
-        // Renderuje cały edytor na podstawie obiektu currentReport
         renderReportEditor() {
             document.getElementById('reportDate').value = this.currentReport.date;
-            
             const stagesContainer = document.getElementById('stagesContainer');
             stagesContainer.innerHTML = '';
-            this.currentReport.stages.forEach((stage, index) => {
-                stagesContainer.appendChild(this.createStageElement(stage, index));
-            });
-
+            this.currentReport.stages.forEach((stage, index) => stagesContainer.appendChild(this.createStageElement(stage, index)));
             const expensesContainer = document.getElementById('expensesContainer');
             expensesContainer.innerHTML = '';
-            this.currentReport.expenses.forEach((exp, index) => {
-                expensesContainer.appendChild(this.createExpenseElement(exp, index));
-            });
-
+            this.currentReport.expenses.forEach((exp, index) => expensesContainer.appendChild(this.createExpenseElement(exp, index)));
             const incomesContainer = document.getElementById('incomesContainer');
             incomesContainer.innerHTML = '';
-            this.currentReport.incomes.forEach((inc, index) => {
-                incomesContainer.appendChild(this.createIncomeElement(inc, index));
-            });
-            
+            this.currentReport.incomes.forEach((inc, index) => incomesContainer.appendChild(this.createIncomeElement(inc, index)));
             this.calculateAndRenderSummaries();
-            this.updateInventory();
+            this.renderInventory();
         },
         
-        // Funkcje dodające elementy do raportu
+        // Dodawanie elementów
         addStage() {
-            this.currentReport.stages.push({ from: '', to: '', distance: '', tasks: [] });
+            this.updateCurrentReportFromDOM();
+            // Ustawia punkt startowy na podstawie poprzedniego punktu docelowego
+            const lastDestination = this.currentReport.stages.length > 0 ? this.currentReport.stages[this.currentReport.stages.length - 1].to : '';
+            this.currentReport.stages.push({ from: lastDestination, to: '', distance: '', tasks: [] });
             this.renderReportEditor();
         },
         addTask(stageIndex) {
-            this.updateCurrentReportFromDOM(); // Zapisz aktualne wartości przed dodaniem nowego
+            this.updateCurrentReportFromDOM();
             this.currentReport.stages[stageIndex].tasks.push({ type: 'INNE', description: '' });
             this.renderReportEditor();
         },
-        addExpense() {
+        addExpense() { this.updateCurrentReportFromDOM(); this.currentReport.expenses.push({ category: 'Jedzenie', amount: '' }); this.renderReportEditor(); },
+        addIncome() { this.updateCurrentReportFromDOM(); this.currentReport.incomes.push({ source: 'Sprzedaż złomu', amount: '' }); this.renderReportEditor(); },
+
+        // Usuwanie elementów
+        removeElement(type, ...indices) {
             this.updateCurrentReportFromDOM();
-            this.currentReport.expenses.push({ category: 'Jedzenie', amount: '' });
-            this.renderReportEditor();
-        },
-        addIncome() {
-            this.updateCurrentReportFromDOM();
-            this.currentReport.incomes.push({ source: 'Sprzedaż złomu', amount: '' });
+            if (type === 'stage') this.currentReport.stages.splice(indices[0], 1);
+            if (type === 'task') this.currentReport.stages[indices[0]].tasks.splice(indices[1], 1);
+            if (type === 'expense') this.currentReport.expenses.splice(indices[0], 1);
+            if (type === 'income') this.currentReport.incomes.splice(indices[0], 1);
             this.renderReportEditor();
         },
 
-        // Funkcje usuwające elementy z raportu
-        removeStage(index) {
-            this.currentReport.stages.splice(index, 1);
-            this.renderReportEditor();
-        },
-        removeTask(stageIndex, taskIndex) {
-            this.currentReport.stages[stageIndex].tasks.splice(taskIndex, 1);
-            this.renderReportEditor();
-        },
-        removeExpense(index) {
-            this.currentReport.expenses.splice(index, 1);
-            this.renderReportEditor();
-        },
-        removeIncome(index) {
-            this.currentReport.incomes.splice(index, 1);
-            this.renderReportEditor();
-        },
-
-        // Tworzy element HTML dla etapu
+        // Tworzenie elementów HTML
         createStageElement(stage, index) {
             const el = document.createElement('div');
             el.className = 'stage-item bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border dark:border-gray-700';
             el.innerHTML = `
                 <div class="flex justify-between items-start mb-3">
                     <p class="font-bold text-lg">Etap ${index + 1}</p>
-                    <button onclick="app.removeStage(${index})" class="text-red-500 hover:text-red-700 font-bold">Usuń etap</button>
+                    <button onclick="app.removeElement('stage', ${index})" class="text-red-500 hover:text-red-700 font-bold no-print">Usuń etap</button>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input type="text" name="from" value="${stage.from}" placeholder="Z (np. Siedlce)" class="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
-                    <input type="text" name="to" value="${stage.to}" placeholder="Do (np. Warszawa)" class="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                    <input type="text" name="from" value="${stage.from}" placeholder="Z (np. Siedlce)" class="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 w-full">
+                    <input type="text" name="to" value="${stage.to}" placeholder="Do (np. Warszawa)" class="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 w-full">
                 </div>
                 <input type="text" name="distance" value="${stage.distance}" placeholder="Dystans (np. 90+20)" class="mt-3 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" oninput="app.calculateAndRenderSummaries()">
                 <div class="mt-4">
@@ -395,106 +337,68 @@
                     <div class="tasks-container space-y-2">
                         ${stage.tasks.map((task, taskIndex) => this.createTaskElement(task, index, taskIndex)).join('')}
                     </div>
-                    <button onclick="app.addTask(${index})" class="mt-2 text-sm bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-800 dark:text-blue-200 font-semibold py-1 px-3 rounded-md w-full">+ Dodaj zadanie</button>
+                    <button onclick="app.addTask(${index})" class="mt-2 text-sm bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-800 dark:text-blue-200 font-semibold py-1 px-3 rounded-md w-full no-print">+ Dodaj zadanie</button>
                 </div>
             `;
             return el;
         },
-
-        // Tworzy element HTML dla zadania
         createTaskElement(task, stageIndex, taskIndex) {
-            const taskTypes = {
-                'ZAŁADUNEK': 'Załadunek',
-                'ROZŁADUNEK': 'Rozładunek',
-                'NAPRAWA': 'Naprawa/Montaż',
-                'INNE': 'Inne'
-            };
+            const taskTypes = { 'ZAŁADUNEK': 'Załadunek', 'ROZŁADUNEK': 'Rozładunek', 'NAPRAWA': 'Naprawa/Montaż', 'INNE': 'Inne' };
             return `
                 <div class="task-item flex gap-2 items-center">
-                    <select name="taskType" class="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" onchange="app.updateInventoryOnTheFly()">
-                        ${Object.entries(taskTypes).map(([key, value]) => `<option value="${key}" ${task.type === key ? 'selected' : ''}>${value}</option>`).join('')}
-                    </select>
-                    <input type="text" name="taskDescription" value="${task.description}" placeholder="Opis zadania" class="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" oninput="app.updateInventoryOnTheFly()">
-                    <button onclick="app.removeTask(${stageIndex}, ${taskIndex})" class="text-red-500 hover:text-red-700 p-1">&times;</button>
-                </div>
-            `;
+                    <select name="taskType" class="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" onchange="app.updateInventoryOnTheFly()">${Object.entries(taskTypes).map(([k, v]) => `<option value="${k}" ${task.type === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+                    <input type="text" name="taskDescription" value="${task.description}" placeholder="Opis zadania" class="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 min-w-0" oninput="app.updateInventoryOnTheFly()">
+                    <button onclick="app.removeElement('task', ${stageIndex}, ${taskIndex})" class="p-2 text-red-500 hover:text-red-700 flex-shrink-0 no-print">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>`;
+        },
+        createExpenseElement(expense, index) { return this.createFinancialElement('expense', expense, index); },
+        createIncomeElement(income, index) { return this.createFinancialElement('income', income, index); },
+        createFinancialElement(type, item, index) {
+            const placeholder = type === 'expense' ? 'Kategoria (np. Paliwo)' : 'Źródło (np. Złom)';
+            const namePrefix = type === 'expense' ? 'expense' : 'income';
+            return `<div class="${type}-item flex gap-2 items-center">
+                    <input type="text" name="${namePrefix}Category" value="${item.category || item.source}" placeholder="${placeholder}" class="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 min-w-0">
+                    <input type="number" step="0.01" name="${namePrefix}Amount" value="${item.amount}" placeholder="Kwota" class="w-28 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" oninput="app.calculateAndRenderSummaries()">
+                    <button onclick="app.removeElement('${type}', ${index})" class="p-2 text-red-500 hover:text-red-700 flex-shrink-0 no-print">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>`;
         },
         
-        // Tworzy element HTML dla wydatku
-        createExpenseElement(expense, index) {
-            const el = document.createElement('div');
-            el.className = 'expense-item flex gap-2 items-center';
-            el.innerHTML = `
-                <input type="text" name="expenseCategory" value="${expense.category}" placeholder="Kategoria (np. Paliwo)" class="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
-                <input type="number" step="0.01" name="expenseAmount" value="${expense.amount}" placeholder="Kwota" class="w-24 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" oninput="app.calculateAndRenderSummaries()">
-                <button onclick="app.removeExpense(${index})" class="text-red-500 hover:text-red-700 p-1">&times;</button>
-            `;
-            return el;
-        },
-
-        // Tworzy element HTML dla przychodu
-        createIncomeElement(income, index) {
-            const el = document.createElement('div');
-            el.className = 'income-item flex gap-2 items-center';
-            el.innerHTML = `
-                <input type="text" name="incomeSource" value="${income.source}" placeholder="Źródło (np. Złom)" class="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
-                <input type="number" step="0.01" name="incomeAmount" value="${income.amount}" placeholder="Kwota" class="w-24 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" oninput="app.calculateAndRenderSummaries()">
-                <button onclick="app.removeIncome(${index})" class="text-red-500 hover:text-red-700 p-1">&times;</button>
-            `;
-            return el;
-        },
-        
-        // Oblicza i wyświetla podsumowania
         calculateAndRenderSummaries() {
-            let totalDistance = 0;
-            document.querySelectorAll('input[name=distance]').forEach(input => {
-                const parts = input.value.split('+').map(part => parseFloat(part.trim()) || 0);
-                totalDistance += parts.reduce((a, b) => a + b, 0);
-            });
-            document.getElementById('summaryDistance').textContent = `${totalDistance.toFixed(0)} km`;
-
-            let totalExpenses = 0;
-            document.querySelectorAll('input[name=expenseAmount]').forEach(input => {
-                totalExpenses += parseFloat(input.value) || 0;
-            });
-            document.getElementById('summaryExpenses').textContent = `${totalExpenses.toFixed(2)} zł`;
-
-            let totalIncomes = 0;
-            document.querySelectorAll('input[name=incomeAmount]').forEach(input => {
-                totalIncomes += parseFloat(input.value) || 0;
-            });
-            document.getElementById('summaryIncomes').textContent = `${totalIncomes.toFixed(2)} zł`;
+            let dist = 0; document.querySelectorAll('input[name=distance]').forEach(i => { dist += (i.value.split('+').map(p => parseFloat(p.trim())||0)).reduce((a, b) => a + b, 0); });
+            document.getElementById('summaryDistance').textContent = `${dist.toFixed(0)} km`;
+            let exp = 0; document.querySelectorAll('input[name=expenseAmount]').forEach(i => { exp += parseFloat(i.value)||0; });
+            document.getElementById('summaryExpenses').textContent = `${exp.toFixed(2)} zł`;
+            let inc = 0; document.querySelectorAll('input[name=incomeAmount]').forEach(i => { inc += parseFloat(i.value)||0; });
+            document.getElementById('summaryIncomes').textContent = `${inc.toFixed(2)} zł`;
         },
         
-        // Aktualizacja stanu magazynowego na bieżąco
-        updateInventoryOnTheFly() {
-            this.updateCurrentReportFromDOM();
-            this.updateInventory();
-        },
-
-        // Aktualizuje i renderuje stan magazynowy
-        updateInventory() {
-            const inventory = {};
-            this.currentReport.stages.forEach(stage => {
+        // Logika stanu magazynowego
+        updateInventoryOnTheFly() { this.updateCurrentReportFromDOM(); this.renderInventory(); },
+        calculateInventoryForReport(report) {
+            const inventory = JSON.parse(JSON.stringify(report.initialInventory || {}));
+            report.stages.forEach(stage => {
                 stage.tasks.forEach(task => {
                     if (!task.description) return;
-                    const items = task.description.split(',').map(s => s.trim().toLowerCase());
+                    const items = task.description.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
                     items.forEach(item => {
-                        if (task.type === 'ZAŁADUNEK') {
-                            inventory[item] = (inventory[item] || 0) + 1;
-                        } else if (task.type === 'ROZŁADUNEK') {
-                            inventory[item] = (inventory[item] || 0) - 1;
-                        }
+                        if (task.type === 'ZAŁADUNEK') inventory[item] = (inventory[item] || 0) + 1;
+                        else if (task.type === 'ROZŁADUNEK') inventory[item] = (inventory[item] || 0) - 1;
                     });
                 });
             });
-
-            const inventoryContainer = document.getElementById('inventoryContainer');
-            inventoryContainer.innerHTML = '';
-            const itemsOnBoard = Object.entries(inventory).filter(([item, count]) => count > 0);
-
+            return inventory;
+        },
+        renderInventory() {
+            const finalInventory = this.calculateInventoryForReport(this.currentReport);
+            const container = document.getElementById('inventoryContainer');
+            container.innerHTML = '';
+            const itemsOnBoard = Object.entries(finalInventory).filter(([_, count]) => count > 0);
             if (itemsOnBoard.length === 0) {
-                inventoryContainer.innerHTML = `<p class="text-gray-500 dark:text-gray-400">Pojazd jest pusty.</p>`;
+                container.innerHTML = `<p class="text-gray-500 dark:text-gray-400">Pojazd jest pusty.</p>`;
             } else {
                 const list = document.createElement('ul');
                 list.className = 'list-disc list-inside space-y-1';
@@ -504,44 +408,93 @@
                     li.textContent = `${item} (x${count})`;
                     list.appendChild(li);
                 });
-                inventoryContainer.appendChild(list);
+                container.appendChild(list);
             }
         },
 
-        // Generuje PDF z raportu
+        // Logika modala do zarządzania stanem
+        openInventoryModal() {
+            this.renderInventoryModal();
+            document.getElementById('inventoryModal').classList.remove('hidden');
+        },
+        closeInventoryModal() {
+            document.getElementById('inventoryModal').classList.add('hidden');
+        },
+        renderInventoryModal() {
+            const listEl = document.getElementById('modalInventoryList');
+            listEl.innerHTML = '';
+            const items = Object.entries(this.globalInventory).filter(([_, count]) => count > 0);
+            if (items.length === 0) {
+                listEl.innerHTML = `<p class="text-gray-500 dark:text-gray-400">Stan globalny jest pusty.</p>`;
+                return;
+            }
+            items.forEach(([item, count]) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-2 rounded';
+                itemEl.innerHTML = `
+                    <span class="capitalize">${item} (x${count})</span>
+                    <button onclick="app.deleteInventoryItem('${item}')" class="text-red-500 hover:text-red-700 font-bold py-1 px-2">Usuń</button>
+                `;
+                listEl.appendChild(itemEl);
+            });
+        },
+        deleteInventoryItem(itemKey) {
+            delete this.globalInventory[itemKey];
+            this.renderInventoryModal();
+        },
+        saveInventoryChanges() {
+            this.saveData();
+            // Zaktualizuj stan początkowy w bieżącym raporcie, jeśli jest to nowy raport
+            if (!this.currentReportId) {
+                this.currentReport.initialInventory = JSON.parse(JSON.stringify(this.globalInventory));
+                this.renderInventory();
+            }
+            this.closeInventoryModal();
+        },
+
+        // Generowanie PDF
         generatePdf() {
             this.updateCurrentReportFromDOM();
             const report = this.currentReport;
+            const finalInventory = this.calculateInventoryForReport(report);
             const content = `
                 <div class="p-8 text-gray-800" style="font-family: 'Inter', sans-serif;">
                     <h1 class="text-3xl font-bold mb-2">Raport Dzienny</h1>
                     <p class="text-xl text-gray-600 mb-6">${new Date(report.date).toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     
+                    <h2 class="text-2xl font-bold mb-3 mt-6 border-b pb-2">Trasa i Zadania</h2>
                     ${report.stages.map(stage => `
                         <div class="mb-4">
                             <p class="text-lg font-semibold">~ ${stage.from || 'Brak'} → ${stage.to || 'Brak'} <span class="text-gray-500 font-normal">(${stage.distance || 0}km)</span></p>
                             <ul class="list-disc list-inside pl-4 mt-1 text-gray-700">
-                                ${stage.tasks.map(task => `<li><strong>[${task.type}]</strong> ${task.description || 'Brak opisu'}</li>`).join('')}
+                                ${stage.tasks.map(task => `<li><strong>[${task.type.charAt(0) + task.type.slice(1).toLowerCase()}]</strong> ${task.description || 'Brak opisu'}</li>`).join('')}
                             </ul>
                         </div>
                     `).join('')}
 
-                    <div class="mt-8 pt-4 border-t-2">
-                        <h2 class="text-2xl font-bold mb-3">Podsumowanie Finansowe</h2>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <h3 class="font-semibold text-lg">Wydatki:</h3>
-                                <ul class="list-disc list-inside">
-                                    ${report.expenses.map(exp => `<li>${exp.category}: ${parseFloat(exp.amount || 0).toFixed(2)} zł</li>`).join('')}
-                                </ul>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-lg">Przychody:</h3>
-                                <ul class="list-disc list-inside">
-                                    ${report.incomes.map(inc => `<li>${inc.source}: ${parseFloat(inc.amount || 0).toFixed(2)} zł</li>`).join('')}
-                                </ul>
-                            </div>
+                    <div class="mt-8 pt-4 border-t-2 grid grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2">Wydatki:</h3>
+                            <ul class="list-disc list-inside">
+                                ${report.expenses.map(exp => `<li>${exp.category}: ${parseFloat(exp.amount || 0).toFixed(2)} zł</li>`).join('')}
+                                ${report.expenses.length === 0 ? '<li>Brak</li>' : ''}
+                            </ul>
                         </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2">Przychody:</h3>
+                            <ul class="list-disc list-inside">
+                                ${report.incomes.map(inc => `<li>${inc.source}: ${parseFloat(inc.amount || 0).toFixed(2)} zł</li>`).join('')}
+                                ${report.incomes.length === 0 ? '<li>Brak</li>' : ''}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-4 border-t-2">
+                        <h3 class="font-semibold text-lg mb-2">Stan pojazdu na koniec dnia:</h3>
+                        <ul class="list-disc list-inside">
+                            ${Object.entries(finalInventory).filter(([_, c]) => c > 0).map(([i, c]) => `<li class="capitalize">${i} (x${c})</li>`).join('')}
+                            ${Object.values(finalInventory).every(c => c <= 0) ? '<li>Pojazd pusty</li>' : ''}
+                        </ul>
                     </div>
                     
                     <div class="mt-8 pt-4 border-t-2 text-right">
@@ -554,24 +507,13 @@
             
             const pdfContentContainer = document.getElementById('pdf-content');
             pdfContentContainer.innerHTML = content;
-            
             const element = document.getElementById('pdf-content');
-            const opt = {
-              margin:       1,
-              filename:     `Raport_${report.date}.pdf`,
-              image:        { type: 'jpeg', quality: 0.98 },
-              html2canvas:  { scale: 2 },
-              jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-
+            const opt = { margin: 0.5, filename: `Raport_${report.date}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
             html2pdf().set(opt).from(element).save();
         }
     };
 
-    // Uruchomienie aplikacji po załadowaniu strony
-    window.onload = () => {
-        app.init();
-    };
+    window.onload = () => app.init();
     </script>
 </body>
 </html>
